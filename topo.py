@@ -28,7 +28,7 @@ class CustomTopology(Topo):
         controller = RemoteController('controller', ip=controller_ip, port=controller_port)
         self.addController(controller)
 
-def run_topology():
+def run_topology(S, heads):
     # Topology parameters
     NUM_HOSTS = len(S)
     NUM_SWITCHES = len(heads)
@@ -45,6 +45,23 @@ def run_topology():
 
     topo.set_controller(CONTROLLER_IP, CONTROLLER_PORT)
 
+    # Add cluster head nodes to the topology
+    for i, head in enumerate(heads):
+        switch_name = f's{i + 1}'
+        host_name = f'h{i + 1}'
+        switch = topo.getNodeByName(switch_name)
+        host = topo.getNodeByName(host_name)
+        topo.addLink(host, switch, bw=BANDWIDTH, delay=DELAY)
+
+    # Add member nodes to the corresponding cluster head switches
+    for head in heads:
+        switch_name = topo.getClusterSwitch(head)
+        switch = topo.getNodeByName(switch_name)
+        for member in head.members:
+            member_name = topo.getHostByIndex(member.id)
+            member_host = topo.getNodeByName(member_name)
+            topo.addLink(member_host, switch, bw=BANDWIDTH, delay=DELAY)
+
     # Create Mininet network
     net = Mininet(topo=topo, link=TCLink)
 
@@ -55,6 +72,7 @@ def run_topology():
 
     # Stop the network
     net.stop()
+
 
 if __name__ == '__main__':
     run_topology()
