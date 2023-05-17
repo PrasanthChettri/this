@@ -70,10 +70,10 @@ def main() :
     NUM_HEADS = 2
     _range = len(S)
 
-
-    heads = cluster_head_selection(_range,S, NUM_HEADS)
+    heads = cluster_head_selection(_range, S, NUM_HEADS)
     print(*heads, sep="\n")
     create_cluster_graph(S, heads)
+    run_topology(S, heads)
 
 if __name__ == "__main__":
     main()
